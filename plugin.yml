@@ -1,0 +1,14 @@
+ name: BlockFinder
+ version: 1.0.1
+ description: Removes all chat recievers in the chat event
+ author: firecombat4
+ load: POSTWORLD
+ main: com.hotmail.steven.main.BlockFinder
+ database: false
+
+ commands:
+   blockfinder:
+     description: Base BlockFinder command
+     aliases: [bf]
+     permission: blockfinder.help
+     usage: /blockfinder help

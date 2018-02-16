@@ -1,0 +1,19 @@
+#################################################
+#---------- BLOCKFINDER CONFIGURATION ----------#
+#################################################
+
+# What should we tell the player when they are near a block to be found
+near:
+  radius: 5 # Distance away from the block to send a message
+  message: '&a&lYou feel a strong presence nearby'
+
+# Give the user a reward
+rewards:
+  find-all: # When all blocks are found
+    command: lp user %player% permission set essentials.kit.blockfinder
+
+mysql:
+  user: root
+  pass: C0nnect.2u
+  database: minecraft
+  table-prefix: _blockfinder
