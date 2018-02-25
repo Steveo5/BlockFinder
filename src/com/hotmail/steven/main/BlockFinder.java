@@ -3,6 +3,7 @@ package com.hotmail.steven.main;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ import com.hotmail.steven.listener.BlockFindListener;
 import com.hotmail.steven.listener.CommandListener;
 import com.hotmail.steven.listener.ItemListener;
 import com.hotmail.steven.listener.PlayerNearListener;
+import com.hotmail.steven.listener.SelectorListener;
 import com.hotmail.steven.main.util.StringUtil;
 
 public class BlockFinder extends JavaPlugin {
@@ -28,6 +30,9 @@ public class BlockFinder extends JavaPlugin {
 	private static HashMap<Location, ItemStack> blocksList;
 	private static BlockFinder plugin;
 	private static HashMap<UUID, List<String>> found;
+	
+	private static LinkedList<Location> possibleSpawns;
+	private static LinkedList<BlockFind> blockList;
 	
 	@Override
 	public void onEnable()
@@ -40,7 +45,7 @@ public class BlockFinder extends JavaPlugin {
 		ItemMeta im = selector.getItemMeta();
 		im.setDisplayName(StringUtil.color("&e&lClick to select"));
 		im.setLore(Arrays.asList(new String[] {StringUtil.color("&7Left-click to add"), StringUtil.color("&7Right-click to remove")}));
-		
+		selector.setItemMeta(im);
 		/**
 		 * Register our events
 		 */
@@ -52,13 +57,16 @@ public class BlockFinder extends JavaPlugin {
 		
 		blocksList = new HashMap<Location, ItemStack>();
 		found = new HashMap<UUID, List<String>>();
+		possibleSpawns = new LinkedList<Location>();
+		blockList = new LinkedList<BlockFind>();
 		
 		/**
 		 * Keep items alive at the location of each block find
 		 */
 		long interval = (20L * 60) * 3;
-		new FindPlaceTask().runTaskTimer(this, interval, interval);
+		new ItemSpawnTask().runTaskTimer(this, interval, interval);
 		new ParticleSpawner().runTaskTimer(this, 0L, 10L);
+		new BlockFindSpawnTask().runTaskTimer(this, 0L, 20L);
 	}
 	
 	/**
@@ -86,61 +94,47 @@ public class BlockFinder extends JavaPlugin {
 	}
 	
 	/**
-	 * Get all the block finds
-	 * @return
+	 * Add a block find that will get automatically spawned
+	 * at a possible block find location
+	 * @param item
 	 */
-	public static HashMap<Location, ItemStack> getBlockFinds()
+	public static void addBlockFind(BlockFind find)
 	{
-		return blocksList;
+		blockList.add(find);
 	}
 	
-	/**
-	 * Add a block to be found at a specified location
-	 * @param Loc - location to place the block
-	 */
-	public static void setBlockFind(String name, ItemStack item, Location loc)
-	{
-		item = item.clone();
-		ItemMeta im = item.getItemMeta();
-		im.setDisplayName(name);
-		item.setItemMeta(im);
-		blocksList.put(loc.getBlock().getLocation(), item);
-	}
-	
-	/**
-	 * Check if there is a block to be found at a location
-	 * @param loc
-	 * @return
-	 */
-	public static boolean hasBlockFind(Location loc)
-	{
-		Location find = loc.getBlock().getLocation();
-		return blocksList.containsKey(find);
-	}
-	
-	/**
-	 * Check if there is a block find with a specific name
-	 * @param name
-	 * @return
-	 */
 	public static boolean hasBlockFind(String name)
 	{
-		for(ItemStack im : blocksList.values())
+		for(BlockFind find : blockList)
 		{
-			if(im.getItemMeta().getDisplayName().equalsIgnoreCase(name)) return true;
+			if(find.getName().equalsIgnoreCase(name))
+			{
+				return true;
+			}
 		}
 		
 		return false;
 	}
 	
 	/**
-	 * Get the actual itemstack for a block to be found
-	 * @param loc
-	 * @return
+	 * Remove a block find
+	 * @param name
 	 */
-	public static ItemStack getBlockFind(Location loc)
+	public static void removeBlockFind(String name)
 	{
-		return blocksList.get(loc);
+		for(BlockFind find : blockList)
+		{
+			if(find.getName().equalsIgnoreCase(name))
+			{
+				blockList.remove(find);
+				return;
+			}
+		}
+	}
+	
+	public static List<BlockFind> getBlockFinds()
+	{
+		return blockList;
 	}
 	
 	/**
@@ -185,7 +179,6 @@ public class BlockFinder extends JavaPlugin {
 	public static void addFound(UUID uuid, String name)
 	{
 		List<String> alreadyFound = null;
-		System.out.println("Addnig " + name);
 		if(found.containsKey(uuid))
 		{
 			alreadyFound = found.get(uuid);
@@ -197,5 +190,69 @@ public class BlockFinder extends JavaPlugin {
 			alreadyFound.add(name);
 			found.put(uuid, alreadyFound);
 		}
+	}
+	
+	public static void removeFound(UUID uuid, String name)
+	{
+		found.remove(uuid);
+	}
+	
+	/**
+	 * Add a possible spawn location
+	 * @param loc
+	 */
+	public static void addPossibleSpawn(Location loc)
+	{
+		possibleSpawns.add(loc);
+	}
+	
+	/**
+	 * Get locations where spawns are a possibility that
+	 * aren't taken by other block finds
+	 * @return
+	 */
+	public static List<Location> getPossibleSpawns()
+	{
+		List<Location> possible = new ArrayList<Location>();
+		// Loop all block finds
+		Outer:
+		for(Location loc : getAllPossibleSpawns())
+		{
+			for(BlockFind find : blockList)
+			{
+				if(find.isSpawned() && loc.equals(find.getLocation()))
+				{
+					continue Outer;
+				}
+			}
+			possible.add(loc);
+		}
+		return possible;
+	}
+	
+	/**
+	 * Gets all the locations including ones where
+	 * a block find is already spawned
+	 * @return
+	 */
+	public static List<Location> getAllPossibleSpawns()
+	{
+		return possibleSpawns;
+	}
+	
+	/**
+	 * Remove a possible spawn location
+	 * @param loc
+	 * @return
+	 */
+	public static boolean removePossibleSpawn(Location loc)
+	{
+		if(possibleSpawns.contains(loc))
+		{
+			possibleSpawns.remove(loc);
+			return true;
+		}
+		
+		return false;
 	}
 }

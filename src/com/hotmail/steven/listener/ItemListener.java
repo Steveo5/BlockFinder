@@ -14,34 +14,44 @@ import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 
+import com.hotmail.steven.main.BlockFind;
 import com.hotmail.steven.main.BlockFinder;
 
 public class ItemListener implements Listener {
 	
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGH)
 	public void onItemPickup(EntityPickupItemEvent evt)
 	{
-		if(BlockFinder.hasBlockFind(evt.getItem().getLocation()))
+		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			evt.setCancelled(true);
+			if(find.isSpawned() && evt.getItem().getLocation().getBlock().equals(find.getLocation().getBlock()))
+			{
+				evt.setCancelled(true);
+			}
 		}
 	}
 	
 	@EventHandler
 	public void onItemCombine(ItemMergeEvent evt)
 	{
-		if(BlockFinder.hasBlockFind(evt.getTarget().getLocation()))
+		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			evt.setCancelled(true);
+			if(find.isSpawned() && evt.getEntity().getLocation().getBlock().equals(find.getLocation().getBlock()))
+			{
+				evt.setCancelled(true);
+			}
 		}
 	}
 	
 	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onItemDespawn(ItemDespawnEvent evt)
 	{
-		if(BlockFinder.hasBlockFind(evt.getLocation()))
+		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			evt.setCancelled(true);
+			if(find.isSpawned() && evt.getEntity().getLocation().getBlock().equals(find.getLocation().getBlock()))
+			{
+				evt.setCancelled(true);
+			}
 		}
 	}
 	

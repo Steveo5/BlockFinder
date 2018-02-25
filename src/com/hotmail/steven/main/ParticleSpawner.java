@@ -1,25 +1,33 @@
 package com.hotmail.steven.main;
 
-import java.util.Random;
-
-import org.bukkit.Effect;
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import net.minecraft.server.v1_12_R1.PacketPlayOutWorldParticles;
 
 public class ParticleSpawner extends BukkitRunnable {
 
 	@Override
 	public void run() {
 		
-		for(Location loc : BlockFinder.getBlockFinds().keySet())
+		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			if(loc.getChunk().isLoaded())
+			if(find.isSpawned() && find.getLocation().getChunk().isLoaded())
 			{
-		        loc.getWorld().playEffect(loc, Effect.MOBSPAWNER_FLAMES, 3);
+		        for(Player player : Bukkit.getOnlinePlayers())
+		        {
+		        	if(player.getWorld().equals(find.getLocation().getWorld()))
+		        	{
+		        		if(BlockFinder.getFound(player).contains(find.getName()))
+		        		{
+		        			player.spawnParticle(Particle.SPELL_WITCH, find.getLocation().clone().add(0.5, 0.5, 0.5), 20);
+		        		} else
+		        		{
+		        			player.spawnParticle(Particle.LAVA, find.getLocation().clone().add(0.5, 0.5, 0.5), 3);
+		        		}
+		        		
+		        	}
+		        }
 			}
 		}
 		

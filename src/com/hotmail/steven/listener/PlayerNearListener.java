@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
+import com.hotmail.steven.main.BlockFind;
 import com.hotmail.steven.main.BlockFinder;
 import com.hotmail.steven.main.util.StringUtil;
 
@@ -40,8 +41,10 @@ public class PlayerNearListener implements Listener {
 		int pZ = p.getLocation().getBlockZ();
 		
 		// Loop possible block finds
-		for(Location blockLoc : BlockFinder.getBlockFinds().keySet())
+		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
+			if(!find.isSpawned()) continue;
+			Location blockLoc = find.getLocation();
 			int x = blockLoc.getBlockX();
 			int y = blockLoc.getBlockY();
 			int z = blockLoc.getBlockZ();
