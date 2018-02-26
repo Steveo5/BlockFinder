@@ -38,6 +38,7 @@ public class BlockFinder extends JavaPlugin {
 	public void onEnable()
 	{
 		plugin = this;
+		BlockFindData.initialize(this);
 		/**
 		 * Create the selector
 		 */
@@ -171,6 +172,12 @@ public class BlockFinder extends JavaPlugin {
 		return getFound(player.getUniqueId());
 	}
 	
+	// Internally sets the list of block finds. Used when BlockFindData.reload() is called
+	static void setFound(HashMap<UUID, List<String>> found)
+	{
+		BlockFinder.found = found;
+	}
+	
 	/**
 	 * Add a found block for a player
 	 * @param uuid
@@ -190,11 +197,16 @@ public class BlockFinder extends JavaPlugin {
 			alreadyFound.add(name);
 			found.put(uuid, alreadyFound);
 		}
+		
+		BlockFindData.addFind(uuid, name);
 	}
 	
 	public static void removeFound(UUID uuid, String name)
 	{
 		found.remove(uuid);
+		
+		
+		BlockFindData.removeFind(uuid, name);
 	}
 	
 	/**

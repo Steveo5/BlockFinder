@@ -1,6 +1,12 @@
 package com.hotmail.steven.listener;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,20 +50,19 @@ public class PlayerNearListener implements Listener {
 		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
 			if(!find.isSpawned()) continue;
-			Location blockLoc = find.getLocation();
-			int x = blockLoc.getBlockX();
-			int y = blockLoc.getBlockY();
-			int z = blockLoc.getBlockZ();
-			// Send message to play if they're near
-			if(pX > x - radius && pX < x + radius)
+			// Player is leaving radius
+			if(!find.isNear(evt.getTo(), 10) && find.isNear(evt.getFrom(), 10))
 			{
-				if(pY > y - radius && pY < y + radius)
-				{
-					if(pZ > z - radius && pZ < z + radius)
-					{
-						p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(StringUtil.color(BlockFinder.getBlockConfig().getString("near.message"))));
-					}
-				}
+				find.hideProgressBar(p);
+			// Player is entering the radius	
+			} else if(find.isNear(evt.getTo(), 10) && find.isNear(evt.getFrom(), 10))
+			{
+				find.showProgressBar(p);
+			}
+			
+			if(find.isNear(p.getLocation(), 10))
+			{
+				find.updateProgressBar(p);
 			}
 			
 		}
