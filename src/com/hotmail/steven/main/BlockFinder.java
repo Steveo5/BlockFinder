@@ -38,6 +38,7 @@ public class BlockFinder extends JavaPlugin {
 	public void onEnable()
 	{
 		plugin = this;
+		this.saveDefaultConfig();
 		BlockFindData.initialize(this);
 		/**
 		 * Create the selector
@@ -97,11 +98,12 @@ public class BlockFinder extends JavaPlugin {
 	/**
 	 * Add a block find that will get automatically spawned
 	 * at a possible block find location
-	 * @param item
+	 * @param find
 	 */
 	public static void addBlockFind(BlockFind find)
 	{
 		blockList.add(find);
+		BlockFindData.addFind(find);
 	}
 	
 	public static boolean hasBlockFind(String name)
@@ -118,6 +120,15 @@ public class BlockFinder extends JavaPlugin {
 	}
 	
 	/**
+	 * Used internally when config data is loaded
+	 * @param finds
+	 */
+	protected static void setBlockFinds(LinkedList<BlockFind> finds)
+	{
+		blockList = finds;
+	}
+	
+	/**
 	 * Remove a block find
 	 * @param name
 	 */
@@ -128,6 +139,7 @@ public class BlockFinder extends JavaPlugin {
 			if(find.getName().equalsIgnoreCase(name))
 			{
 				blockList.remove(find);
+				BlockFindData.removeFind(name);
 				return;
 			}
 		}
@@ -206,7 +218,7 @@ public class BlockFinder extends JavaPlugin {
 		found.remove(uuid);
 		
 		
-		BlockFindData.removeFind(uuid, name);
+		BlockFindData.removeCollected(uuid, name);
 	}
 	
 	/**
@@ -215,7 +227,9 @@ public class BlockFinder extends JavaPlugin {
 	 */
 	public static void addPossibleSpawn(Location loc)
 	{
+
 		possibleSpawns.add(loc);
+		BlockFindData.addPossibleSpawn(loc);
 	}
 	
 	/**
@@ -262,9 +276,15 @@ public class BlockFinder extends JavaPlugin {
 		if(possibleSpawns.contains(loc))
 		{
 			possibleSpawns.remove(loc);
+			BlockFindData.removePossibleSpawn(loc);
 			return true;
 		}
 		
 		return false;
+	}
+
+	protected static void setPossibleSpawns(LinkedList<Location> spawns)
+	{
+		possibleSpawns = spawns;
 	}
 }

@@ -104,10 +104,21 @@ public class BlockFind {
 	 * 
 	 * Will throw a NPE if this BlockFind isn't spawned
 	 * @param p
+	 * @param radius
 	 */
-	public void updateProgressBar(Player p)
+	public void updateProgressBar(Player p, int radius)
 	{
+
 		double distance = p.getLocation().distance(spawnedLoc);
+		double percentage = (distance/radius) * 100;
+
+		for(BossBar bar : progressBars.values())
+		{
+			if(bar.getPlayers().contains(p))
+			{
+				bar.setProgress(percentage);
+			}
+		}
 	}
 	
 	/**

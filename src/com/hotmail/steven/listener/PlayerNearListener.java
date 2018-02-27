@@ -57,12 +57,15 @@ public class PlayerNearListener implements Listener {
 			// Player is entering the radius	
 			} else if(find.isNear(evt.getTo(), 10) && find.isNear(evt.getFrom(), 10))
 			{
-				find.showProgressBar(p);
+				if(find.isSpawned())
+				{
+					find.showProgressBar(p);
+				}
 			}
 			
 			if(find.isNear(p.getLocation(), 10))
 			{
-				find.updateProgressBar(p);
+				find.updateProgressBar(p, 10);
 			}
 			
 		}
