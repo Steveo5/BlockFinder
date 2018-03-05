@@ -20,10 +20,10 @@ public class ParticleSpawner extends BukkitRunnable {
 		        	{
 		        		if(BlockFinder.getFound(player).contains(find.getName()))
 		        		{
-		        			player.spawnParticle(Particle.SPELL_WITCH, find.getLocation().clone().add(0.5, 0.5, 0.5), 20);
+		        			player.spawnParticle(Settings.PARTICLE_TYPE_FOUND.getParticle(), find.getLocation().clone().add(0.5, 0.5, 0.5), 20);
 		        		} else
 		        		{
-		        			player.spawnParticle(Particle.LAVA, find.getLocation().clone().add(0.5, 0.5, 0.5), 3);
+		        			player.spawnParticle(Settings.PARTICLE_TYPE.getParticle(), find.getLocation().clone().add(0.5, 0.5, 0.5), 3);
 		        		}
 		        		
 		        	}

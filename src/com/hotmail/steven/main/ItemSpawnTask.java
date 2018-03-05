@@ -16,7 +16,10 @@ public class ItemSpawnTask extends BukkitRunnable {
 		{
 			if(find.getLocation().getChunk().isLoaded())
 			{
-				
+				if(find.isSpawned())
+				{
+					find.getItem().remove();
+				}
 			}
 		}
 		

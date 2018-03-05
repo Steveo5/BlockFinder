@@ -1,18 +1,46 @@
 #################################################
-#---------- BLOCKFINDER CONFIGURATION ----------#
+#---------- BLOCK FINDER CONFIGURATION ----------#
 #################################################
 
 # What should we tell the player when they are near a block to be found
 near:
   radius: 5 # Distance away from the block to send a message
-  message: '&a&lYou feel a strong presence nearby'
+  message: # Message to show in the boss bar (boss bar percentage fills up depending how close the player is)
+    enabled: true;
+    message: '&a&lYou feel a strong presence nearby'
+
+# Valid types are as follows:
+#
+# Spiral, DoubleSpiral, Crit, BigCrit, Flame, BigFlame, Volcano, Fog,
+# Enchant, Storm, Chains, FireStorm, Snow, Potion, Music, Spew,Magic,
+# Witch, DoubleWitch, SnowStorm, FireSpew, FootPrint, Water, HappyVillager,
+# AngryVillager, MobSpawner, EnderSignal, Rainbow,SnowBlast, Halo, SoulWell,
+# BigSoulWell, LoveWell, BigLoveWell,FlameWheel, WitchTornado, LoveTornado
+particle: # Show particles for block finds as an indicator where they are in the world
+  enabled: true # Enabled true or enabled false
+  type: LAVA
+  found: # What particle should we display when found?
+    type: SPELL_WITCH
 
 # Give the user a reward
 rewards:
-  find-all: # When all blocks are found
-    command: lp user %player% permission set essentials.kit.blockfinder
+  find:
+    title: # Sent to the player who found the block
+      major: '&6Found block!'
+      minor: '&eYou have found %collected% / %finds%'
+    broadcast: # Sent to the entire server
+    - '&a%player% has found a new block'
+    command: '' # leave blank to have no command
+  find-all:
+    title: # Sent to the player who found the block
+      major: '&6Found block!'
+      minor: '&6New kit unlocked!'
+    broadcast: # Sent to the entire server
+    - '&a%player% has found a new block'
+    command: 'lp user %player% permission set essentials.kit.blockfinder'
 
 mysql:
+  enabled: false
   user: root
   pass: C0nnect.2u
   database: minecraft

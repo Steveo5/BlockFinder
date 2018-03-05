@@ -24,7 +24,7 @@ public class ItemListener implements Listener {
 	{
 		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			if(find.isSpawned() && evt.getItem().getLocation().getBlock().equals(find.getLocation().getBlock()))
+			if(find.isSpawned() && evt.getItem().getItemStack().isSimilar(find.getItemStack()))
 			{
 				evt.setCancelled(true);
 			}
@@ -36,7 +36,7 @@ public class ItemListener implements Listener {
 	{
 		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			if(find.isSpawned() && evt.getEntity().getLocation().getBlock().equals(find.getLocation().getBlock()))
+			if(find.isSpawned() && evt.getEntity().getItemStack().isSimilar(find.getItemStack()))
 			{
 				evt.setCancelled(true);
 			}
@@ -48,7 +48,7 @@ public class ItemListener implements Listener {
 	{
 		for(BlockFind find : BlockFinder.getBlockFinds())
 		{
-			if(find.isSpawned() && evt.getEntity().getLocation().getBlock().equals(find.getLocation().getBlock()))
+			if(find.isSpawned() && evt.getEntity().getItemStack().isSimilar(find.getItemStack()))
 			{
 				evt.setCancelled(true);
 			}

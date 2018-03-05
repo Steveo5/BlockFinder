@@ -11,6 +11,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -69,6 +70,11 @@ public class BlockFind {
 		
 		
 	}
+
+	protected void setItem(Entity item)
+	{
+		spawnedEnt = item;
+	}
 	
 	/**
 	 * Create and start displaying a progress bar for a player.
@@ -79,7 +85,7 @@ public class BlockFind {
 	 */
 	public void showProgressBar(Player p)
 	{
-		BossBar bar = Bukkit.createBossBar(StringUtil.color(BlockFinder.getBlockConfig().getString("near.message")), BarColor.PURPLE, BarStyle.SOLID);
+		BossBar bar = Bukkit.createBossBar(StringUtil.color(BlockFinder.getBlockConfig().getString("near.message.message")), BarColor.PURPLE, BarStyle.SOLID);
 		bar.addPlayer(p);
 		progressBars.put(p.getUniqueId(), bar);
 	}
@@ -110,8 +116,16 @@ public class BlockFind {
 	{
 
 		double distance = p.getLocation().distance(spawnedLoc);
-		double percentage = (distance/radius) * 100;
+		// Calculate percentage as a double
+		double percentage = (distance/radius);
+		// Due to distance calculate we round our percentage to 1
+		if(percentage > 1) percentage = 1;
+		// Swap the percentage so 60% becomes 40%
+		percentage = 1 - percentage;
+		// Ad some padding
+		if(percentage > 0.9) percentage = 1;
 
+		// Update the players boss bar
 		for(BossBar bar : progressBars.values())
 		{
 			if(bar.getPlayers().contains(p))
@@ -123,8 +137,8 @@ public class BlockFind {
 	
 	/**
 	 * Check if a player is within a certain distance of this block find
-	 * @param p
-	 * @param distance
+	 * @param loc
+	 * @param radius
 	 * @return
 	 */
 	public boolean isNear(Location loc, int radius)

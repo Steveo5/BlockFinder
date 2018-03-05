@@ -3,6 +3,7 @@ package com.hotmail.steven.listener;
 import java.util.HashMap;
 import java.util.List;
 
+import com.hotmail.steven.main.Settings;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -72,8 +73,25 @@ public class BlockFindListener implements Listener {
 			onBlockFindAll(player);
 		} else
 		{
-			player.sendTitle(ChatColor.GOLD + "Found block!", ChatColor.BLUE + "You have found " + (found.size() == 0 ? 1 : found.size()) +  " / " + blockFinds.size(), 10, 70, 20);
-			Bukkit.broadcastMessage(StringUtil.color("&d&l" + player.getName() + " is one step closer to getting a new kit!"));
+			StringBuilder major = new StringBuilder();
+			major.append(Settings.REWARD_FIND_TITLE_MAJOR.getString().isEmpty() ? "" : Settings.REWARD_FIND_TITLE_MAJOR.getString());
+			StringBuilder minor = new  StringBuilder();
+			minor.append(Settings.REWARD_FIND_TITLE_MINOR.getString().isEmpty() ? "" : Settings.REWARD_FIND_TITLE_MINOR.getString()
+					.replaceAll("%collected%",String.valueOf(found.size() == 0 ? 1 : found.size()))
+					.replaceAll("%finds%", String.valueOf(blockFinds.size())));
+
+
+			player.sendTitle(StringUtil.color(major.toString()), StringUtil.color(minor.toString()), 10, 70, 20);
+
+			if(!Settings.REWARD_FIND_BROADCAST.getStringList().isEmpty()) {
+				for(String broadcast : Settings.REWARD_FIND_BROADCAST.getStringList()) {
+					Bukkit.broadcastMessage(StringUtil.color(broadcast.replaceAll("%player%", player.getName())));
+				}
+			}
+			ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+			for(String command : Settings.REWARD_FIND_COMMANDS.getStringList()) {
+				Bukkit.dispatchCommand(console, "/" + command.replaceAll("%player%", player.getName()));
+			}
 		}
 		
 		return true;
@@ -81,11 +99,29 @@ public class BlockFindListener implements Listener {
 	
 	public void onBlockFindAll(Player player)
 	{
-		player.sendTitle(ChatColor.GOLD + "Found block!", ChatColor.BLUE + "You have gained a new kit!", 10, 70, 20);
-		
+		// Get the blocks that can be found
+		List<BlockFind> blockFinds = BlockFinder.getBlockFinds();
+		List<String> found = BlockFinder.getFound(player);
+
+		StringBuilder major = new StringBuilder();
+		major.append(Settings.REWARD_FINDALL_TITLE_MAJOR.getString().isEmpty() ? "" : Settings.REWARD_FINDALL_TITLE_MAJOR.getString());
+		StringBuilder minor = new  StringBuilder();
+		minor.append(Settings.REWARD_FINDALL_TITLE_MINOR.getString().isEmpty() ? "" : Settings.REWARD_FINDALL_TITLE_MINOR.getString()
+				.replaceAll("%collected%",String.valueOf(found.size() == 0 ? 1 : found.size()))
+				.replaceAll("%finds%", String.valueOf(blockFinds.size())));
+
+
+		player.sendTitle(StringUtil.color(major.toString()), StringUtil.color(minor.toString()), 10, 70, 20);
+		;
+		if(!Settings.REWARD_FINDALL_BROADCAST.getStringList().isEmpty()) {
+			for(String broadcast : Settings.REWARD_FINDALL_BROADCAST.getStringList()) {
+				Bukkit.broadcastMessage(StringUtil.color(broadcast.replaceAll("%player%", player.getName())));
+			}
+		}
 		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-		String command = "/" + BlockFinder.getBlockConfig().getString("rewards.find-all.command").replaceAll("%player%", player.getName());
-		Bukkit.dispatchCommand(console, command);
+		for(String command : Settings.REWARD_FINDALL_COMMANDS.getStringList()) {
+			Bukkit.dispatchCommand(console, "/" + command.replaceAll("%player%", player.getName()));
+		}
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.hotmail.steven.listener;
 
+import com.hotmail.steven.main.Settings;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -21,13 +22,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class PlayerNearListener implements Listener {
 
-	int radius = 0;
-	
-	public PlayerNearListener()
-	{
-		radius = BlockFinder.getBlockConfig().getInt("near.radius");
-	}
-	
 	@EventHandler
 	public void onMove(PlayerMoveEvent evt)
 	{
@@ -51,11 +45,11 @@ public class PlayerNearListener implements Listener {
 		{
 			if(!find.isSpawned()) continue;
 			// Player is leaving radius
-			if(!find.isNear(evt.getTo(), 10) && find.isNear(evt.getFrom(), 10))
+			if(!find.isNear(evt.getTo(), Settings.NEAR_RADIUS.getInteger()) && find.isNear(evt.getFrom(), Settings.NEAR_RADIUS.getInteger()))
 			{
 				find.hideProgressBar(p);
 			// Player is entering the radius	
-			} else if(find.isNear(evt.getTo(), 10) && find.isNear(evt.getFrom(), 10))
+			} else if(find.isNear(evt.getTo(), Settings.NEAR_RADIUS.getInteger()) && !find.isNear(evt.getFrom(), Settings.NEAR_RADIUS.getInteger()))
 			{
 				if(find.isSpawned())
 				{
@@ -63,9 +57,9 @@ public class PlayerNearListener implements Listener {
 				}
 			}
 			
-			if(find.isNear(p.getLocation(), 10))
+			if(find.isNear(p.getLocation(), Settings.NEAR_RADIUS.getInteger()))
 			{
-				find.updateProgressBar(p, 10);
+				find.updateProgressBar(p, Settings.NEAR_RADIUS.getInteger());
 			}
 			
 		}

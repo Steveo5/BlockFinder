@@ -33,13 +33,15 @@ public class BlockFinder extends JavaPlugin {
 	
 	private static LinkedList<Location> possibleSpawns;
 	private static LinkedList<BlockFind> blockList;
-	
+
+	private static DataSource dataSource;
+
 	@Override
 	public void onEnable()
 	{
 		plugin = this;
 		this.saveDefaultConfig();
-		BlockFindData.initialize(this);
+		loadSettings();
 		/**
 		 * Create the selector
 		 */
@@ -55,20 +57,50 @@ public class BlockFinder extends JavaPlugin {
 		this.getServer().getPluginManager().registerEvents(new PlayerNearListener(), this);
 		this.getServer().getPluginManager().registerEvents(new ItemListener(), this);
 		this.getServer().getPluginManager().registerEvents(new BlockFindListener(), this);
-		this.getCommand("blockfinder").setExecutor(new CommandListener());
+		this.getCommand("blockfinder").setExecutor(new CommandListener(this));
 		
 		blocksList = new HashMap<Location, ItemStack>();
 		found = new HashMap<UUID, List<String>>();
 		possibleSpawns = new LinkedList<Location>();
 		blockList = new LinkedList<BlockFind>();
+
+		if(Settings.MYSQL_ENABLED.getBoolean())
+		{
+			dataSource = new MysqlSource(this);
+		} else
+		{
+			dataSource = new FlatfileSource(this);
+		}
 		
 		/**
 		 * Keep items alive at the location of each block find
 		 */
-		long interval = (20L * 60) * 3;
+		long interval = (20L * 30);
 		new ItemSpawnTask().runTaskTimer(this, interval, interval);
 		new ParticleSpawner().runTaskTimer(this, 0L, 10L);
 		new BlockFindSpawnTask().runTaskTimer(this, 0L, 20L);
+	}
+
+	/**
+	 * Load the settings from config file, can be also used to reload
+	 * the values from config (also reloads config)
+	 */
+	public void loadSettings()
+	{
+		this.reloadConfig();
+		for(Settings setting : Settings.values())
+		{
+			setting.setValue(getConfig().get(setting.getNode()));
+		}
+	}
+
+	/**
+	 * Gets the main storage component
+	 * @return
+	 */
+	public static DataSource getDataSource()
+	{
+		return dataSource;
 	}
 	
 	/**
@@ -103,7 +135,7 @@ public class BlockFinder extends JavaPlugin {
 	public static void addBlockFind(BlockFind find)
 	{
 		blockList.add(find);
-		BlockFindData.addFind(find);
+		getDataSource().addFind(find);
 	}
 	
 	public static boolean hasBlockFind(String name)
@@ -125,7 +157,9 @@ public class BlockFinder extends JavaPlugin {
 	 */
 	protected static void setBlockFinds(LinkedList<BlockFind> finds)
 	{
-		blockList = finds;
+		BlockFinder.blockList = finds;
+
+		System.out.println("Finds " + blockList.size());
 	}
 	
 	/**
@@ -139,7 +173,7 @@ public class BlockFinder extends JavaPlugin {
 			if(find.getName().equalsIgnoreCase(name))
 			{
 				blockList.remove(find);
-				BlockFindData.removeFind(name);
+				getDataSource().removeFind(name);
 				return;
 			}
 		}
@@ -147,6 +181,7 @@ public class BlockFinder extends JavaPlugin {
 	
 	public static List<BlockFind> getBlockFinds()
 	{
+
 		return blockList;
 	}
 	
@@ -187,7 +222,9 @@ public class BlockFinder extends JavaPlugin {
 	// Internally sets the list of block finds. Used when BlockFindData.reload() is called
 	static void setFound(HashMap<UUID, List<String>> found)
 	{
+
 		BlockFinder.found = found;
+		System.out.println("Found " + found.size());
 	}
 	
 	/**
@@ -210,7 +247,7 @@ public class BlockFinder extends JavaPlugin {
 			found.put(uuid, alreadyFound);
 		}
 		
-		BlockFindData.addFind(uuid, name);
+		getDataSource().addFind(uuid, name);
 	}
 	
 	public static void removeFound(UUID uuid, String name)
@@ -218,7 +255,7 @@ public class BlockFinder extends JavaPlugin {
 		found.remove(uuid);
 		
 		
-		BlockFindData.removeCollected(uuid, name);
+		getDataSource().removeCollected(uuid, name);
 	}
 	
 	/**
@@ -229,7 +266,7 @@ public class BlockFinder extends JavaPlugin {
 	{
 
 		possibleSpawns.add(loc);
-		BlockFindData.addPossibleSpawn(loc);
+		getDataSource().addPossibleSpawn(loc);
 	}
 	
 	/**
@@ -276,7 +313,7 @@ public class BlockFinder extends JavaPlugin {
 		if(possibleSpawns.contains(loc))
 		{
 			possibleSpawns.remove(loc);
-			BlockFindData.removePossibleSpawn(loc);
+			getDataSource().removePossibleSpawn(loc);
 			return true;
 		}
 		
@@ -285,6 +322,7 @@ public class BlockFinder extends JavaPlugin {
 
 	protected static void setPossibleSpawns(LinkedList<Location> spawns)
 	{
-		possibleSpawns = spawns;
+		BlockFinder.possibleSpawns = spawns;
+		System.out.println("Setting spawns to " + possibleSpawns.size());
 	}
 }
